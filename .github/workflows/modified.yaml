@@ -1,0 +1,49 @@
+name: Check Build
+
+# CINTENT >> MANUAL_TRIGGER
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+on: [repository_dispatch, workflow_dispatch]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    # to fail on error in multiline statements (-e), in pipes (-o pipefail), and on unset variables (-u).
+    shell: bash -euo pipefail {0}
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          fetch-depth: 0
+          
+      # CINTENT >> INSERT_CINTENT
+      - uses: JavidDitty/setup-cintent@a606c80c34ec190c6a20dea33d6d58ddb6c4e0cc
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          cache-dependency-glob: pyproject.toml
+          
+      - name: Build package
+        run: uv build
+
+      - name: Check package
+        run: uvx twine check --strict dist/*.whl
+
+      # CINTENT >> INSERT_CINTENT
+      - name: Upload CIntent Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ env.CINTENT_ARTIFACT_NAME }}
+          path: ${{ env.CINTENT_LOGS }}

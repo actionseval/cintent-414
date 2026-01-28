@@ -25,14 +25,15 @@ jobs:
         with:
           filter: blob:none
           fetch-depth: 0
-          
-      # CINTENT >> INSERT_CINTENT
-      - uses: JavidDitty/setup-cintent@a606c80c34ec190c6a20dea33d6d58ddb6c4e0cc
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-        with:
-          cache-dependency-glob: pyproject.toml
+        # CINTENT >> REMOVE_CACHE
+        # with:
+        #   cache-dependency-glob: pyproject.toml
+
+      # CINTENT >> INSERT_CINTENT
+      - uses: JavidDitty/setup-cintent@3e5b2faf83a2ad32c22a1cd0f86f5f20ea53a5ab
           
       - name: Build package
         run: uv build
